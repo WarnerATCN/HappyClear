@@ -9,50 +9,38 @@ import SwiftUI
 import SwiftData
 
 struct ContentView: View {
-    @Environment(\.modelContext) private var modelContext
-    @Query private var items: [Item]
-
+    let frameWidth:Int = 6
+    let level: Int = 3
+    @ObservedObject var mainData: MainData
+    init() {
+        self.mainData = MainData(length: frameWidth, diffcult: level)
+    }
+    
     var body: some View {
-        NavigationSplitView {
-            List {
-                ForEach(items) { item in
-                    NavigationLink {
-                        Text("Item at \(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))")
-                    } label: {
-                        Text(item.timestamp, format: Date.FormatStyle(date: .numeric, time: .standard))
+        GeometryReader{ geomertry in
+            let currentWidth = min(geomertry.size.width, geomertry.size.height)
+            VStack{
+                ZStack{
+                    BackgroudGrid(length: frameWidth)
+                    //                Animal(coordinates: Coordinates(x: 2, y: 2))
+                    ForEach(self.mainData.animals) { animal in
+                        animal
                     }
                 }
-                .onDelete(perform: deleteItems)
-            }
-            .toolbar {
-                ToolbarItem(placement: .navigationBarTrailing) {
-                    EditButton()
+                .frame(width: currentWidth, height: currentWidth)
+                Button {
+                    self.mainData.checkSameLine()
+                } label: {
+                    Text("Play")
+                        .padding()
+                        .border(.gray, width: 1)
                 }
-                ToolbarItem {
-                    Button(action: addItem) {
-                        Label("Add Item", systemImage: "plus")
-                    }
-                }
+
             }
-        } detail: {
-            Text("Select an item")
         }
+        
     }
 
-    private func addItem() {
-        withAnimation {
-            let newItem = Item(timestamp: Date())
-            modelContext.insert(newItem)
-        }
-    }
-
-    private func deleteItems(offsets: IndexSet) {
-        withAnimation {
-            for index in offsets {
-                modelContext.delete(items[index])
-            }
-        }
-    }
 }
 
 #Preview {
