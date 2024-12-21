@@ -22,15 +22,15 @@ struct ContentView: View {
             VStack{
                 ZStack{
                     BackgroudGrid(length: frameWidth)
-                    //                Animal(coordinates: Coordinates(x: 2, y: 2))
-                    ForEach(self.mainData.animals) { animal in
+                    ForEach(Array(self.mainData.animalDict.values)){ animal in
                         animal
                     }
+                    
                 }
                 .frame(width: currentWidth, height: currentWidth)
-                Button {
+                Button (action:{
                     self.mainData.checkSameLine()
-                } label: {
+                }){
                     Text("Play")
                         .padding()
                         .border(.gray, width: 1)

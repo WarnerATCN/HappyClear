@@ -7,7 +7,7 @@
 
 import SwiftUI
 
-struct Coordinates: Equatable{
+struct Coordinates: Equatable, Hashable{
     var x: Int
     var y: Int
 }
@@ -48,6 +48,8 @@ struct Animal: View, Identifiable {
                     self.scale = 0.1
                 }
             }
+            .transition(.scale)
+            .animation(.spring(), value: self.coordinates)
         }
     }    
 }
