@@ -23,9 +23,8 @@ struct ContentView: View {
                 ZStack{
                     BackgroudGrid(length: frameWidth)
                     ForEach(Array(self.mainData.animalDict.values)){ animal in
-                        animal
-                    }
-                    
+                        AnimalView(animal: animal, mainData: self.mainData)
+                    }                    
                 }
                 .frame(width: currentWidth, height: currentWidth)
                 Button (action:{
@@ -35,7 +34,10 @@ struct ContentView: View {
                         .padding()
                         .border(.gray, width: 1)
                 }
-
+                
+                Text("当前卡片数量：\(self.mainData.$animalDict.count)")
+                    .fontWeight(.bold)
+                    .font(.largeTitle)
             }
         }
         

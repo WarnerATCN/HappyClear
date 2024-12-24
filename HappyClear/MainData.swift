@@ -23,7 +23,7 @@ class MainData: ObservableObject{
             for ypos in (0 ..< Int(self.frameWidth)){
                 let ttype = Int.random(in: 1 ... diffcult)
 //                print(ttype)
-                let animal = Animal(ttype: ttype, coordinates: Coordinates(x: xpos, y: ypos))
+                let animal = Animal(coordinates: Coordinates(x: xpos, y: ypos), ttype: ttype)
 //                self.animals.append(animal)
                 animalDict[animal.coordinates] = animal
             }
@@ -33,7 +33,7 @@ class MainData: ObservableObject{
     /**
      检查所有行列上每一张卡片附近是否有连续相同类型的卡片
      */
-    func checkSameLine(){
+    func checkSameLine() -> Bool{
         let direction: Direction = .down
 //        sort(in: direction)
         var isCleared = false
@@ -74,11 +74,9 @@ class MainData: ObservableObject{
         if isCleared{
             // 发生消除事件，进行移动操作
             move(in: direction)
-            
             // 移动完后，重新看看有没有可以消除的卡片
-            
-
         }
+        return isCleared
     }
     /**
         获取同一行列上连续相同类型的卡片。
@@ -130,7 +128,7 @@ class MainData: ObservableObject{
             print("当前位置有卡片，继续向上.\(y)")
         }
         let ttype = Int.random(in: 1 ... diffcult)
-        self.animalDict[Coordinates(x: x, y: y)] = Animal(ttype: ttype, coordinates: Coordinates(x: x, y: y))
+        self.animalDict[Coordinates(x: x, y: y)] = Animal(coordinates: Coordinates(x: x, y: y), ttype: ttype)
     }
     /**
         对已经删除的卡片进行补位
@@ -138,22 +136,20 @@ class MainData: ObservableObject{
     func move(in direction: Direction){
 //        sort(in: direction)
         for (coor, animal) in self.animalDict.sorted(by: { $0.key.x < $1.key.x || ($0.key.x == $1.key.x && $0.key.y > $1.key.y) }){
-//            print(coor)
             var hasSpace = haveSpace(animal: animal, direction: direction)
             var currentAnimal = animal
-            while hasSpace{                
-                var newAnimal = currentAnimal
-                newAnimal.coordinates = Coordinates(x: currentAnimal.coordinates.x + travel(in: direction).x, y:currentAnimal.coordinates.y + travel(in: direction).y)
-                print("开始移动:\(currentAnimal.coordinates),新位置：\(newAnimal.coordinates)")
-                self.animalDict[newAnimal.coordinates] = newAnimal
-                self.animalDict.removeValue(forKey: currentAnimal.coordinates)
-                currentAnimal = newAnimal
-//                guard let idx = self.animals.firstIndex(where: {$0.id == animal.id}) else {return}
-//                self.animals[idx].coordinates.x += travel(in: direction).x
-//                self.animals[idx].coordinates.y += travel(in: direction).y
+            while hasSpace{
+                let originalPos = currentAnimal.coordinates
+//                var newAnimal = currentAnimal
+                currentAnimal.coordinates = Coordinates(x: currentAnimal.coordinates.x + travel(in: direction).x, y:currentAnimal.coordinates.y + travel(in: direction).y)
+//                print("开始移动:\(currentAnimal.coordinates),新位置：\(newAnimal.coordinates)")
+                self.animalDict[currentAnimal.coordinates] = currentAnimal
+                self.animalDict.removeValue(forKey: originalPos)
+//                currentAnimal = newAnimal
                 hasSpace = haveSpace(animal: currentAnimal, direction: direction)
             }
         }
+        checkSameLine()
     }
     func sort(in direction: Direction){
         
@@ -177,6 +173,26 @@ class MainData: ObservableObject{
         case .down: return (0,1)
         case .left: return(-1,0)
         case .right: return(1,0)
+        }
+    }
+    
+    func swapAniaml(animal: Animal, direction: Direction){
+        let original = animal.coordinates
+        print("原坐标：\(original)")
+        let target = Coordinates(x:  original.x + travel(in: direction).x, y: original.y + travel(in: direction).y)
+        print("新坐标：\(target)")
+        if target.x >= 0 , target.x < frameWidth,target.y >= 0, target.y < frameWidth {
+            print(animalDict[target]?.coordinates)
+            print("原坐标：\(original)")
+            
+            let targetAnimal = self.animalDict[target]!
+            targetAnimal.coordinates = original
+            print(animalDict[target]?.coordinates)
+            let originalAnimal = animalDict[original]!
+            animal.coordinates = target
+            
+            self.animalDict[original] = targetAnimal
+            self.animalDict[target] = animal            
         }
     }
 
