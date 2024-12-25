@@ -29,6 +29,7 @@ class Animal: Identifiable, ObservableObject{
     var id: UUID = UUID()
     @Published var coordinates: Coordinates
     var ttype = 1
+    var willRemove = false
     
     init(coordinates: Coordinates, ttype: Int) {
 //        self.id = UUID()
@@ -85,7 +86,7 @@ struct AnimalView: View {
                     let translation = trans.translation
                     let posx = Int(round(translation.width / length))
                     let posy = Int(round(translation.height / length))
-                    let orignalPos = self.animal.coordinates
+//                    let orignalPos = self.animal.coordinates
                     
                     if max(abs(posx), abs(posy)) > 1{
                         var direction: Direction
@@ -100,9 +101,11 @@ struct AnimalView: View {
 
                         }
                         self.mainData.swapAniaml(animal: self.animal, direction: direction)
-                        if !self.mainData.checkSameLine(){
-                            // 没有进行任何消除行为，交换失败
-                            self.mainData.swapAniaml(animal: self.animal, direction: getReverseDirection(direction))
+                        DispatchQueue.main.asyncAfter(deadline: .now() + 0.2){
+                            if !self.mainData.checkSameLine(){
+                                // 没有进行任何消除行为，交换失败
+                                self.mainData.swapAniaml(animal: self.animal, direction: getReverseDirection(direction))
+                            }
                         }
                     }
 

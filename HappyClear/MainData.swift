@@ -45,14 +45,23 @@ class MainData: ObservableObject{
                 print("hNeighbours:\(hNeighbours.count )")
                 hNeighbours.append(animal)
                 for item in hNeighbours {
-                    print("移除了：\(item.coordinates)")
+//                    print("移除了：\(item.coordinates)")
+                    self.animalDict[item.coordinates]!.willRemove.toggle()
                     self.animalDict.removeValue(forKey: item.coordinates)
-                    print("横向删除了一个卡片")
+//                    print("横向删除了一个卡片")
                     supply(coordinate: item.coordinates)
 //                    if let idx = self.animals.firstIndex(where: {$0.id == item.id}){
 //                        self.animals.remove(at: idx)
 //                    }
                 }
+//                DispatchQueue.main.asyncAfter(deadline: .now() + 0.2){
+//                    for item in hNeighbours {
+//                        if item.willRemove{
+//                            self.animalDict.removeValue(forKey: item.coordinates)
+//                        }
+//                    }
+//                }
+ 
                 isCleared.toggle()
                 break
             }
@@ -60,6 +69,7 @@ class MainData: ObservableObject{
                 print("vNeighbours:\(vNeighbours.count )")
                 vNeighbours.append(animal)
                 for item in vNeighbours {
+                    self.animalDict[item.coordinates]!.willRemove.toggle()
                     self.animalDict.removeValue(forKey: item.coordinates)
                     print("纵向删除了一个卡片")
                     supply(coordinate: item.coordinates)
@@ -135,9 +145,9 @@ class MainData: ObservableObject{
      */
     func move(in direction: Direction){
 //        sort(in: direction)
-        for (coor, animal) in self.animalDict.sorted(by: { $0.key.x < $1.key.x || ($0.key.x == $1.key.x && $0.key.y > $1.key.y) }){
+        for (_, animal) in self.animalDict.sorted(by: { $0.key.x < $1.key.x || ($0.key.x == $1.key.x && $0.key.y > $1.key.y) }){
             var hasSpace = haveSpace(animal: animal, direction: direction)
-            var currentAnimal = animal
+            let currentAnimal = animal
             while hasSpace{
                 let originalPos = currentAnimal.coordinates
 //                var newAnimal = currentAnimal
@@ -176,19 +186,24 @@ class MainData: ObservableObject{
         }
     }
     
+    /**
+     交换卡片
+     animal: 要交换的卡片
+     direction: 交换的方向
+     */
     func swapAniaml(animal: Animal, direction: Direction){
         let original = animal.coordinates
         print("原坐标：\(original)")
         let target = Coordinates(x:  original.x + travel(in: direction).x, y: original.y + travel(in: direction).y)
         print("新坐标：\(target)")
         if target.x >= 0 , target.x < frameWidth,target.y >= 0, target.y < frameWidth {
-            print(animalDict[target]?.coordinates)
+//            print(animalDict[target]?.coordinates)
             print("原坐标：\(original)")
             
             let targetAnimal = self.animalDict[target]!
             targetAnimal.coordinates = original
-            print(animalDict[target]?.coordinates)
-            let originalAnimal = animalDict[original]!
+//            print(animalDict[target]?.coordinates)
+//            let originalAnimal = animalDict[original]!
             animal.coordinates = target
             
             self.animalDict[original] = targetAnimal
@@ -210,7 +225,7 @@ class MainData: ObservableObject{
         }
         
         if position.x >= 0 && position.x<frameWidth && position.y >= 0 && position.y < frameWidth{
-            guard let target = self.animalDict[position] else{ return true}
+            guard self.animalDict[position] != nil && !self.animalDict[position]!.willRemove else{ return true}
 
 //            if let card = self.animals.first(where: { card in
 //                card.coordinates.x == position.x && card.coordinates.y == position.y

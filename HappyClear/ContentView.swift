@@ -10,7 +10,7 @@ import SwiftData
 
 struct ContentView: View {
     let frameWidth:Int = 6
-    let level: Int = 3
+    let level: Int = 5
     @ObservedObject var mainData: MainData
     init() {
         self.mainData = MainData(length: frameWidth, diffcult: level)
